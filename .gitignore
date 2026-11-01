@@ -1,0 +1,19 @@
+# Environment & Sensitive files
+.env
+.env.backup
+*.local
+
+# Logs
+storage/logs/*.log
+!storage/logs/.gitkeep
+
+# Uploads
+storage/uploads/*
+!storage/uploads/.gitkeep
+
+# OS / Editor generated
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp
