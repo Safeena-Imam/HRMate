@@ -154,6 +154,7 @@ $holidayCount = $monthSummary['holiday'] ?? 0;
         </div>
 
         <form method="POST" action="<?= url('attendance/save-daily') ?>" id="dailyAttendanceForm">
+            <?= csrf_field() ?>
             <input type="hidden" name="csrf_token" value="<?= e($csrf) ?>">
             <input type="hidden" name="date" value="<?= e($selectedDateStr) ?>">
 
@@ -383,6 +384,7 @@ $holidayCount = $monthSummary['holiday'] ?? 0;
             </div>
 
             <form method="POST" action="<?= url('attendance/save') ?>" id="attendanceForm">
+                <?= csrf_field() ?>
                 <input type="hidden" name="csrf_token" value="<?= e($csrf) ?>">
                 <input type="hidden" name="employee_id" value="<?= (int)$selectedEmployeeId ?>">
                 <input type="hidden" name="month" value="<?= e($selectedMonthStr) ?>">

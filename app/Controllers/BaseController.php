@@ -44,7 +44,7 @@ abstract class BaseController
      */
     protected function validateCSRF(): bool
     {
-        $token = $_POST['_csrf_token'] ?? $_SERVER['HTTP_X_CSRF_TOKEN'] ?? null;
+        $token = $_POST['_csrf_token'] ?? $_POST['csrf_token'] ?? $_SERVER['HTTP_X_CSRF_TOKEN'] ?? null;
         if (!CSRF::verify($token)) {
             set_flash('danger', 'Security validation failed (Invalid or expired CSRF token). Please try submitting the form again.');
             return false;

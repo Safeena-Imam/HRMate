@@ -285,7 +285,8 @@ class DashboardController extends BaseController
         }
 
         if (!$this->validateCSRF()) {
-            redirect('attendance');
+            $date = trim($_POST['date'] ?? date('Y-m-d'));
+            redirect("attendance?date={$date}&mode=daily");
             return;
         }
 
@@ -331,7 +332,9 @@ class DashboardController extends BaseController
         }
 
         if (!$this->validateCSRF()) {
-            redirect('attendance');
+            $empId = (int)($_POST['employee_id'] ?? 0);
+            $month = trim($_POST['month'] ?? date('Y-m'));
+            redirect("attendance?employee_id={$empId}&month={$month}");
             return;
         }
 
