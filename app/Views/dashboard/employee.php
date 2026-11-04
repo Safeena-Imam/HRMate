@@ -7,7 +7,7 @@ $activeTab = $activeTab ?? 'my-workspace';
 
 
 <!-- =============================================================
-     TAB 1: PERSONAL WORKSPACE & PUNCH OVERVIEW
+     TAB 1: PERSONAL WORKSPACE OVERVIEW
      ============================================================= -->
 <div class="hrm-tab-pane <?= $activeTab === 'my-workspace' ? 'active' : '' ?>" id="tab-my-workspace">
     <?php if (!empty($announcements)): ?>
@@ -38,16 +38,16 @@ $activeTab = $activeTab ?? 'my-workspace';
             <div class="hrm-metric-card" style="--card-accent: var(--hrm-emerald);">
                 <div class="d-flex justify-content-between align-items-start">
                     <div>
-                        <div class="hrm-metric-value text-success" style="font-size: 1.4rem;">09:14 AM</div>
-                        <div class="hrm-metric-label">Today's Clock-In</div>
+                        <div class="hrm-metric-value text-success" style="font-size: 1.25rem;"><?= e($profile['employee_code'] ?? 'EMP-1001') ?></div>
+                        <div class="hrm-metric-label">Employee Code</div>
                     </div>
                     <div class="hrm-metric-icon emerald">
-                        <i class="bi bi-alarm-fill"></i>
+                        <i class="bi bi-person-badge-fill"></i>
                     </div>
                 </div>
                 <div class="mt-3 pt-2 border-top d-flex align-items-center justify-content-between text-muted small">
-                    <span>Shift Progress</span>
-                    <span class="fw-semibold text-success">6h 45m elapsed</span>
+                    <span>Account Status</span>
+                    <span class="fw-semibold text-success"><i class="bi bi-check-circle me-1"></i>Active Staff</span>
                 </div>
             </div>
         </div>
@@ -56,7 +56,7 @@ $activeTab = $activeTab ?? 'my-workspace';
             <div class="hrm-metric-card" style="--card-accent: #d97706;">
                 <div class="d-flex justify-content-between align-items-start">
                     <div>
-                        <div class="hrm-metric-value text-warning">14 Days</div>
+                        <div class="hrm-metric-value text-warning"><?= (int)($leaveBalance['annual']['remaining'] ?? 14) ?> Days</div>
                         <div class="hrm-metric-label">Annual Leave Balance</div>
                     </div>
                     <div class="hrm-metric-icon amber">
@@ -64,8 +64,8 @@ $activeTab = $activeTab ?? 'my-workspace';
                     </div>
                 </div>
                 <div class="mt-3 pt-2 border-top d-flex align-items-center justify-content-between text-muted small">
-                    <span>Quota: 20 Days/yr</span>
-                    <span class="fw-semibold text-dark">6 days used</span>
+                    <span>Quota: <?= (int)($leaveBalance['annual']['total'] ?? 14) ?> Days/yr</span>
+                    <span class="fw-semibold text-dark"><?= (int)($leaveBalance['annual']['used'] ?? 0) ?> days used</span>
                 </div>
             </div>
         </div>
@@ -74,16 +74,16 @@ $activeTab = $activeTab ?? 'my-workspace';
             <div class="hrm-metric-card" style="--card-accent: var(--hrm-accent);">
                 <div class="d-flex justify-content-between align-items-start">
                     <div>
-                        <div class="hrm-metric-value text-teal" style="color: var(--hrm-accent);">96.5%</div>
-                        <div class="hrm-metric-label">Monthly Punctuality</div>
+                        <div class="hrm-metric-value text-teal" style="color: var(--hrm-accent);"><?= (int)($monthSummary['present'] ?? 0) ?> Days</div>
+                        <div class="hrm-metric-label">Present This Month</div>
                     </div>
                     <div class="hrm-metric-icon teal">
-                        <i class="bi bi-check2-circle"></i>
+                        <i class="bi bi-calendar-check-fill"></i>
                     </div>
                 </div>
                 <div class="mt-3 pt-2 border-top d-flex align-items-center justify-content-between text-muted small">
-                    <span>20 of 21 working days</span>
-                    <span class="fw-semibold text-success">On-Time</span>
+                    <span>Leaves: <?= (int)($monthSummary['leave'] ?? 0) ?></span>
+                    <span class="fw-semibold text-muted">Absent: <?= (int)($monthSummary['absent'] ?? 0) ?></span>
                 </div>
             </div>
         </div>
@@ -92,7 +92,7 @@ $activeTab = $activeTab ?? 'my-workspace';
             <div class="hrm-metric-card" style="--card-accent: #64748b;">
                 <div class="d-flex justify-content-between align-items-start">
                     <div>
-                        <div class="hrm-metric-value" style="font-size: 1.25rem;">Marcus S.</div>
+                        <div class="hrm-metric-value" style="font-size: 1.25rem;"><?= e($profile['manager_name'] ?? 'Marcus Sterling') ?></div>
                         <div class="hrm-metric-label">Direct Supervisor</div>
                     </div>
                     <div class="hrm-metric-icon slate">
@@ -101,7 +101,7 @@ $activeTab = $activeTab ?? 'my-workspace';
                 </div>
                 <div class="mt-3 pt-2 border-top d-flex align-items-center justify-content-between text-muted small">
                     <span>Department</span>
-                    <span class="fw-semibold text-dark">Chief Technology Officer</span>
+                    <span class="fw-semibold text-dark"><?= e($profile['department_name'] ?? 'General') ?></span>
                 </div>
             </div>
         </div>
@@ -109,99 +109,85 @@ $activeTab = $activeTab ?? 'my-workspace';
 
     <!-- Personal Overview Split -->
     <div class="row g-4 mb-4">
-        <!-- Left: Quick Clock-In Widget & Timesheet -->
+        <!-- Left: Official Attendance Status & Overview -->
         <div class="col-12 col-xl-7">
             <div class="hrm-panel mb-4">
-                <div class="hrm-panel-header">
-                    <h6 class="hrm-panel-title">
-                        <i class="bi bi-stopwatch-fill" style="color: var(--hrm-accent);"></i>
-                        Daily Web Attendance Punch
+                <div class="hrm-panel-header d-flex justify-content-between align-items-center">
+                    <h6 class="hrm-panel-title mb-0">
+                        <i class="bi bi-shield-check" style="color: var(--hrm-accent, #9DE500);"></i>
+                        Attendance &amp; Monthly Summary
                     </h6>
-                    <span class="badge bg-success-subtle text-success">In Progress</span>
+                    <span class="badge bg-light text-dark border">Admin-Verified</span>
                 </div>
                 <div class="hrm-panel-body">
                     <div class="p-3 bg-light rounded-3 border mb-3">
                         <div class="d-flex justify-content-between align-items-center mb-2">
-                            <span class="text-muted small">Standard Work Shift</span>
-                            <span class="badge bg-light text-dark border font-monospace">09:00 AM – 05:30 PM</span>
+                            <span class="text-muted small">Official Department Work Shift</span>
+                            <span class="badge bg-light text-dark border font-monospace">09:00 AM – 05:30 PM (Mon–Fri)</span>
                         </div>
                         <div class="row text-center g-2 mt-2">
-                            <div class="col-4">
-                                <small class="text-muted d-block">Punch-In</small>
-                                <span class="fw-bold text-success font-monospace">09:14 AM</span>
+                            <div class="col-3">
+                                <small class="text-muted d-block">Present</small>
+                                <span class="fw-bold text-success font-monospace"><?= (int)($monthSummary['present'] ?? 0) ?> Days</span>
                             </div>
-                            <div class="col-4">
-                                <small class="text-muted d-block">Break Taken</small>
-                                <span class="fw-bold text-secondary font-monospace">45 Mins</span>
+                            <div class="col-3">
+                                <small class="text-muted d-block">Leaves</small>
+                                <span class="fw-bold text-primary font-monospace"><?= (int)($monthSummary['leave'] ?? 0) ?> Days</span>
                             </div>
-                            <div class="col-4">
-                                <small class="text-muted d-block">Expected Out</small>
-                                <span class="fw-bold text-primary font-monospace">05:30 PM</span>
+                            <div class="col-3">
+                                <small class="text-muted d-block">Half Day</small>
+                                <span class="fw-bold text-warning font-monospace"><?= (int)($monthSummary['half_day'] ?? 0) ?> Days</span>
+                            </div>
+                            <div class="col-3">
+                                <small class="text-muted d-block">Absent</small>
+                                <span class="fw-bold text-danger font-monospace"><?= (int)($monthSummary['absent'] ?? 0) ?> Days</span>
                             </div>
                         </div>
                     </div>
-                    <div class="d-flex gap-2">
-                        <button type="button" class="btn btn-outline-secondary btn-sm flex-fill" onclick="alert('Break recorded. Enjoy your lunch break!');">
-                            <i class="bi bi-cup-hot me-1"></i> Start 30-min Lunch Break
-                        </button>
-                        <button type="button" class="btn btn-outline-primary btn-sm flex-fill" onclick="document.querySelector('[data-target=\'tab-my-attendance\']').click();">
-                            <i class="bi bi-calendar3 me-1"></i> View Full Timesheet
-                        </button>
+                    
+                    <div class="alert alert-light border d-flex align-items-center gap-2 mb-3 py-2 px-3 small text-muted">
+                        <i class="bi bi-info-circle-fill text-primary fs-5"></i>
+                        <div>
+                            <strong>Admin-Managed Attendance:</strong> Your monthly attendance is officially recorded and verified directly by HR Administration.
+                        </div>
+                    </div>
+
+                    <div>
+                        <a href="<?= url('dashboard?tab=my-attendance') ?>" class="btn btn-outline-dark btn-sm w-100 fw-semibold">
+                            <i class="bi bi-calendar3 me-1"></i> View My Full Attendance Log &amp; Timesheet
+                        </a>
                     </div>
                 </div>
             </div>
 
-            <!-- Recent Personal Shift Activity -->
+            <!-- Quick Department Overview Card -->
             <div class="hrm-panel">
                 <div class="hrm-panel-header">
                     <h6 class="hrm-panel-title">
-                        <i class="bi bi-clock-history" style="color: var(--hrm-emerald);"></i>
-                        My Recent Daily Punches
+                        <i class="bi bi-building" style="color: var(--hrm-emerald, #10b981);"></i>
+                        My Department &amp; Assignment
                     </h6>
-                    <span class="badge bg-light text-dark border">This Week</span>
+                    <span class="badge bg-light text-dark border"><?= e($profile['department_name'] ?? 'General') ?></span>
                 </div>
-                <div class="table-responsive">
-                    <table class="table hrm-table table-hover align-middle mb-0">
-                        <thead>
-                            <tr>
-                                <th>Date</th>
-                                <th>In Time</th>
-                                <th>Out Time</th>
-                                <th>Total Hours</th>
-                                <th>Status</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td class="fw-semibold text-dark">Today, <?= date('M d') ?></td>
-                                <td class="font-monospace text-success">09:14 AM</td>
-                                <td class="font-monospace text-muted">Currently Active</td>
-                                <td class="font-monospace fw-semibold text-dark">6h 45m</td>
-                                <td><span class="badge-status active">ON TIME</span></td>
-                            </tr>
-                            <tr>
-                                <td class="fw-semibold text-dark">Yesterday</td>
-                                <td class="font-monospace text-success">08:58 AM</td>
-                                <td class="font-monospace text-muted">05:32 PM</td>
-                                <td class="font-monospace fw-semibold text-dark">8h 34m</td>
-                                <td><span class="badge-status active">ON TIME</span></td>
-                            </tr>
-                            <tr>
-                                <td class="fw-semibold text-dark">2 Days Ago</td>
-                                <td class="font-monospace text-success">09:05 AM</td>
-                                <td class="font-monospace text-muted">05:35 PM</td>
-                                <td class="font-monospace fw-semibold text-dark">8h 30m</td>
-                                <td><span class="badge-status active">ON TIME</span></td>
-                            </tr>
-                            <tr>
-                                <td class="fw-semibold text-dark">3 Days Ago</td>
-                                <td class="font-monospace text-success">09:12 AM</td>
-                                <td class="font-monospace text-muted">05:40 PM</td>
-                                <td class="font-monospace fw-semibold text-dark">8h 28m</td>
-                                <td><span class="badge-status active">ON TIME</span></td>
-                            </tr>
-                        </tbody>
-                    </table>
+                <div class="hrm-panel-body">
+                    <div class="row g-3">
+                        <div class="col-6">
+                            <span class="text-muted small d-block">Designation</span>
+                            <strong class="text-dark"><?= e($profile['designation_title'] ?? 'Staff') ?></strong>
+                        </div>
+                        <div class="col-6">
+                            <span class="text-muted small d-block">Reporting Manager</span>
+                            <strong class="text-dark"><?= e($profile['manager_name'] ?? 'Marcus Sterling') ?></strong>
+                        </div>
+                        <div class="col-6">
+                            <span class="text-muted small d-block">Official Email</span>
+                            <span class="text-dark small"><?= e($profile['email'] ?? '') ?></span>
+                        </div>
+                        <div class="col-6">
+                            <span class="text-muted small d-block">Hire Date</span>
+                            <span class="text-dark small"><?= !empty($profile['hire_date']) ? date('M d, Y', strtotime($profile['hire_date'])) : '—' ?></span>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>

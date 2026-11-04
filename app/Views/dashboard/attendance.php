@@ -202,7 +202,7 @@ $holidayCount = $monthSummary['holiday'] ?? 0;
                                     </select>
                                 </td>
                                 <td>
-                                    <input type="text" name="notes[<?= $dayDateStr ?>]" class="form-control form-control-sm" placeholder="Optional remark (e.g. Approved leave, late clock-in)" value="<?= e($curNotes) ?>">
+                                    <input type="text" name="notes[<?= $dayDateStr ?>]" class="form-control form-control-sm" placeholder="Optional remark (e.g. Approved leave, late arrival)" value="<?= e($curNotes) ?>">
                                 </td>
                                 <td class="text-center row-state-badge">
                                     <?php if ($curStatus === 'present'): ?>
