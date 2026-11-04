@@ -140,5 +140,51 @@ class Attendance
         $stmt->execute(['year' => $year, 'month' => $month]);
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
+
+    /**
+     * Get attendance records for all active employees for a single date.
+     * Returns array of employees with their current marked attendance status and notes.
+     */
+    public static function getByDate(string $date): array
+    {
+        $pdo = Database::getConnection();
+        $stmt = $pdo->prepare(
+            "SELECT e.id, 
+                    CONCAT(e.first_name, ' ', e.last_name) AS full_name,
+                    e.first_name,
+                    e.last_name,
+                    e.employee_code,
+                    d.name AS department_name,
+                    des.title AS designation_title,
+                    a.status,
+                    a.notes
+             FROM employees e
+             LEFT JOIN departments d ON d.id = e.department_id
+             LEFT JOIN designations des ON des.id = e.designation_id
+             LEFT JOIN attendance a ON a.employee_id = e.id AND a.date = :date
+             WHERE e.employment_status = 'active'
+             ORDER BY e.first_name ASC"
+        );
+        $stmt->execute(['date' => $date]);
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    /**
+     * Save / update daily attendance in batch for all employees.
+     */
+    public static function saveDailyBatch(string $date, array $attendanceData, array $notesData, int $markedBy): int
+    {
+        $count = 0;
+        foreach ($attendanceData as $empId => $status) {
+            $empId = (int)$empId;
+            if ($empId <= 0 || empty($status)) {
+                continue;
+            }
+            $note = trim($notesData[$empId] ?? '');
+            self::saveRecord($empId, $date, $status, $note, $markedBy);
+            $count++;
+        }
+        return $count;
+    }
 }
 

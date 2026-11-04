@@ -158,10 +158,7 @@ class DashboardController extends BaseController
     }
 
     /**
-     * Dedicated Attendance & Leaves Page
-     */
-    /**
-     * Dedicated Attendance & Leaves Page (Admin Monthly Calendar & Overview)
+     * Dedicated Attendance & Leaves Page (Admin Daily Roster & Monthly Calendar)
      */
     public function attendance(): void
     {
@@ -175,6 +172,39 @@ class DashboardController extends BaseController
             $allEmployees    = Employee::getAll();
             $departments     = Department::getAll();
 
+            // Mode: 'daily' (default) or 'monthly'
+            $currentMode = $_GET['mode'] ?? 'daily';
+            if (!in_array($currentMode, ['daily', 'monthly'], true)) {
+                $currentMode = 'daily';
+            }
+
+            // Daily Date selector
+            $selectedDate = $_GET['date'] ?? date('Y-m-d');
+            if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $selectedDate)) {
+                $selectedDate = date('Y-m-d');
+            }
+
+            // Fetch daily attendance records for all active employees
+            $dailyAttendance = Attendance::getByDate($selectedDate);
+            $dailySummary = [
+                'present'        => 0,
+                'absent'         => 0,
+                'half_day'       => 0,
+                'leave'          => 0,
+                'work_from_home' => 0,
+                'holiday'        => 0,
+                'unmarked'       => 0,
+            ];
+            foreach ($dailyAttendance as $dRow) {
+                $st = $dRow['status'] ?? '';
+                if (isset($dailySummary[$st])) {
+                    $dailySummary[$st]++;
+                } else {
+                    $dailySummary['unmarked']++;
+                }
+            }
+
+            // Monthly timesheet selector
             $selectedMonth = $_GET['month'] ?? date('Y-m');
             if (!preg_match('/^\d{4}-\d{2}$/', $selectedMonth)) {
                 $selectedMonth = date('Y-m');
@@ -209,6 +239,10 @@ class DashboardController extends BaseController
             $employeeMetrics      = ['total' => 0, 'active' => 0, 'inactive' => 0, 'on_leave' => 0];
             $allEmployees         = [];
             $departments          = [];
+            $currentMode          = 'daily';
+            $selectedDate         = date('Y-m-d');
+            $dailyAttendance      = [];
+            $dailySummary         = ['present' => 0, 'absent' => 0, 'half_day' => 0, 'leave' => 0, 'work_from_home' => 0, 'holiday' => 0, 'unmarked' => 0];
             $selectedMonth        = date('Y-m');
             $selectedEmployeeId   = 0;
             $selectedEmployee     = null;
@@ -224,6 +258,10 @@ class DashboardController extends BaseController
             'employeeMetrics'      => $employeeMetrics,
             'allEmployees'         => $allEmployees,
             'departments'          => $departments,
+            'currentMode'          => $currentMode,
+            'selectedDate'         => $selectedDate,
+            'dailyAttendance'      => $dailyAttendance,
+            'dailySummary'         => $dailySummary,
             'selectedMonth'        => $selectedMonth,
             'selectedEmployeeId'   => $selectedEmployeeId,
             'selectedEmployee'     => $selectedEmployee,
@@ -231,6 +269,52 @@ class DashboardController extends BaseController
             'monthSummary'         => $monthSummary,
             'monthlyStaffOverview' => $monthlyStaffOverview
         ], 'main');
+    }
+
+    /**
+     * Save daily attendance batch for all employees (Admin only)
+     */
+    public function saveDailyAttendance(): void
+    {
+        if (has_role('employee') || (!has_role('admin') && !has_permission('attendance.manage'))) {
+            $this->view('errors.403', [
+                'pageTitle' => '403 Forbidden',
+                'message'   => 'Only administrators and authorized managers can manage attendance records.'
+            ], 'auth');
+            return;
+        }
+
+        if (!$this->validateCSRF()) {
+            redirect('attendance');
+            return;
+        }
+
+        $date           = trim($_POST['date'] ?? date('Y-m-d'));
+        $attendanceData = $_POST['daily_attendance'] ?? [];
+        $notesData      = $_POST['daily_notes'] ?? [];
+        $currentUser    = current_user();
+        $markedBy       = $currentUser['id'] ?? 1;
+
+        if (is_array($attendanceData) && !empty($attendanceData)) {
+            try {
+                $savedCount = Attendance::saveDailyBatch($date, $attendanceData, $notesData, $markedBy);
+
+                AuditLog::record(
+                    $currentUser['id'] ?? null,
+                    'ATTENDANCE_DAILY_UPDATE',
+                    'attendance',
+                    null,
+                    "Marked daily attendance for {$savedCount} staff members for date {$date}"
+                );
+
+                set_flash('success', "Daily attendance for " . date('M d, Y', strtotime($date)) . " was successfully saved ({$savedCount} staff records updated)!");
+            } catch (\Throwable $e) {
+                \App\Services\Logger::exception($e, "saveDailyAttendance failed");
+                set_flash('danger', 'Error updating daily attendance: ' . $e->getMessage());
+            }
+        }
+
+        redirect("attendance?date={$date}&mode=daily");
     }
 
     /**

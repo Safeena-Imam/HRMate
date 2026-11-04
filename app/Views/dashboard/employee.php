@@ -477,18 +477,27 @@ $activeTab = $activeTab ?? 'my-workspace';
                     </tr>
                 </thead>
                 <tbody>
-                    <?php for ($d = 1; $d <= $empDaysInMonth; $d++): 
+                    <?php 
+                    $todayStr = date('Y-m-d');
+                    for ($d = 1; $d <= $empDaysInMonth; $d++): 
                         $dayDateStr = sprintf('%04d-%02d-%02d', $empYear, $empM, $d);
                         $timestamp  = strtotime($dayDateStr);
                         $dayName    = date('l', $timestamp);
                         $shortDate  = date('M d, Y', $timestamp);
                         $isWeekend  = ($dayName === 'Saturday' || $dayName === 'Sunday');
+                        $isToday    = ($dayDateStr === $todayStr);
+                        $isFuture   = ($dayDateStr > $todayStr);
                         $record     = $attendanceRecords[$dayDateStr] ?? null;
                         $curStatus  = $record['status'] ?? ($isWeekend ? 'holiday' : null);
                         $curNotes   = $record['notes'] ?? '';
                     ?>
-                        <tr class="<?= $isWeekend ? 'bg-light bg-opacity-50' : '' ?>">
-                            <td class="fw-semibold text-dark"><?= $shortDate ?></td>
+                        <tr class="<?= $isToday ? 'table-success bg-opacity-25' : ($isWeekend ? 'bg-light bg-opacity-50' : '') ?>">
+                            <td class="fw-semibold text-dark">
+                                <?= $shortDate ?>
+                                <?php if ($isToday): ?>
+                                    <span class="badge bg-success ms-1 small" style="font-size: 0.65rem;">TODAY</span>
+                                <?php endif; ?>
+                            </td>
                             <td>
                                 <span class="badge <?= $isWeekend ? 'bg-secondary bg-opacity-25 text-secondary' : 'bg-light text-dark border' ?> small">
                                     <?= $dayName ?>
@@ -507,12 +516,14 @@ $activeTab = $activeTab ?? 'my-workspace';
                                     <span class="badge bg-info bg-opacity-25 text-info fw-bold"><i class="bi bi-laptop me-1"></i>Work From Home</span>
                                 <?php elseif ($curStatus === 'holiday'): ?>
                                     <span class="badge bg-secondary bg-opacity-25 text-secondary"><i class="bi bi-calendar-event me-1"></i>Holiday / Off</span>
+                                <?php elseif ($isFuture): ?>
+                                    <span class="badge bg-light text-muted border fst-italic">Upcoming Day</span>
                                 <?php else: ?>
-                                    <span class="badge bg-light text-muted border fst-italic">Pending / Not Marked</span>
+                                    <span class="badge bg-light text-secondary border fst-italic">Pending HR Entry</span>
                                 <?php endif; ?>
                             </td>
                             <td class="small text-secondary">
-                                <?= !empty($curNotes) ? e($curNotes) : ($isWeekend ? '<span class="text-muted">Weekend Off</span>' : '<span class="text-muted fst-italic">—</span>') ?>
+                                <?= !empty($curNotes) ? e($curNotes) : ($isWeekend ? '<span class="text-muted">Weekend Off</span>' : ($isFuture ? '<span class="text-muted fst-italic">—</span>' : '<span class="text-muted fst-italic">Regular Day</span>')) ?>
                             </td>
                             <td class="text-end">
                                 <span class="badge bg-light text-secondary border small">

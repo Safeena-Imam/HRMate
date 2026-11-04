@@ -34,6 +34,7 @@ Router::get('/designations', function() { redirect('departments'); }, [AuthMiddl
 // Attendance & Export Routes
 Router::get('/attendance', [DashboardController::class, 'attendance'], [AuthMiddleware::class]);
 Router::post('/attendance/save', [DashboardController::class, 'saveAttendance'], [AuthMiddleware::class]);
+Router::post('/attendance/save-daily', [DashboardController::class, 'saveDailyAttendance'], [AuthMiddleware::class]);
 Router::get('/attendance/export', [DashboardController::class, 'exportAttendance'], [AuthMiddleware::class]);
 
 // Leave Management Routes
