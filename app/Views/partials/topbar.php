@@ -92,11 +92,7 @@ $unreadCount = count($topbarAnnouncements);
                     <?php endif; ?>
                 </div>
 
-                <li class="py-2 bg-light text-center border-top">
-                    <a href="<?= url('dashboard') ?>" class="text-decoration-none fw-semibold small text-primary" style="font-size: 0.75rem;">
-                        View All on Dashboard &rarr;
-                    </a>
-                </li>
+
             </ul>
         </div>
 
