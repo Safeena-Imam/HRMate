@@ -6,6 +6,14 @@ if (!empty($user['first_name'])) {
 } elseif (!empty($user['username'])) {
     $initials = strtoupper(substr($user['username'], 0, 2));
 }
+
+$topbarAnnouncements = [];
+try {
+    $topbarAnnouncements = \App\Models\Announcement::getActive(5);
+} catch (\Throwable $e) {
+    $topbarAnnouncements = [];
+}
+$unreadCount = count($topbarAnnouncements);
 ?>
 <header class="hrm-topbar">
     <div class="hrm-topbar-left d-flex align-items-center">
@@ -20,9 +28,77 @@ if (!empty($user['first_name'])) {
         <!-- Refresh Button -->
         <button type="button" class="hrm-toggle-btn d-none d-md-flex align-items-center justify-content-center"
                 onclick="window.location.reload();" title="Refresh dashboard data"
-                style="width: 36px; height: 36px; border-radius: 8px; border: 1px solid var(--hrm-border); background: var(--hrm-border-subtle);">
+                style="width: 36px; height: 36px; border-radius: 8px; border: 1px solid var(--hrm-border); background: var(--hrm-border-subtle); color: var(--hrm-text, #333);">
             <i class="bi bi-arrow-clockwise" style="font-size: 1rem;"></i>
         </button>
+
+        <!-- Company Notifications & Announcements Bell Dropdown -->
+        <div class="dropdown">
+            <button class="hrm-toggle-btn d-flex align-items-center justify-content-center position-relative border-0" 
+                    type="button" id="notificationsDropdown" data-bs-toggle="dropdown" aria-expanded="false"
+                    title="Company Notices & Announcements"
+                    style="width: 36px; height: 36px; border-radius: 8px; border: 1px solid var(--hrm-border); background: var(--hrm-border-subtle); color: var(--hrm-text, #333); cursor: pointer;">
+                <i class="bi bi-bell<?= $unreadCount > 0 ? '-fill text-warning' : '' ?>" style="font-size: 1.05rem;"></i>
+                <?php if ($unreadCount > 0): ?>
+                    <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" 
+                          style="font-size: 0.65rem; padding: 0.22em 0.45em; border: 2px solid #fff;">
+                        <?= $unreadCount ?>
+                    </span>
+                <?php endif; ?>
+            </button>
+
+            <ul class="dropdown-menu dropdown-menu-end shadow-lg border-0 py-0" aria-labelledby="notificationsDropdown" 
+                style="border-radius: 12px; width: 320px; max-width: 90vw; overflow: hidden; z-index: 1060;">
+                <li class="px-3 py-2 bg-light border-bottom d-flex align-items-center justify-content-between">
+                    <span class="fw-bold text-dark small">
+                        <i class="bi bi-megaphone-fill me-1 text-primary"></i> Company Notices
+                    </span>
+                    <span class="badge bg-secondary-subtle text-secondary small" style="font-size: 0.7rem;">
+                        <?= $unreadCount ?> Active
+                    </span>
+                </li>
+
+                <div style="max-height: 290px; overflow-y: auto;">
+                    <?php if (empty($topbarAnnouncements)): ?>
+                        <div class="text-center py-4 px-3 text-muted">
+                            <i class="bi bi-check2-circle fs-3 text-success d-block mb-1"></i>
+                            <div class="small fw-semibold">No New Announcements</div>
+                            <div style="font-size: 0.75rem;">You are all caught up!</div>
+                        </div>
+                    <?php else: ?>
+                        <?php foreach ($topbarAnnouncements as $ann): 
+                            $isUrgent = ($ann['priority'] === 'urgent');
+                            $isWarn   = ($ann['priority'] === 'warning');
+                            $badgeClass = $isUrgent ? 'bg-danger text-white' : ($isWarn ? 'bg-warning text-dark' : 'bg-primary-subtle text-primary');
+                            $badgeText  = strtoupper($ann['priority']);
+                        ?>
+                            <li class="border-bottom">
+                                <a href="<?= url('dashboard') ?>" class="dropdown-item px-3 py-2 text-wrap" style="white-space: normal;">
+                                    <div class="d-flex align-items-center justify-content-between mb-1">
+                                        <span class="badge <?= $badgeClass ?> font-monospace" style="font-size: 0.62rem;"><?= $badgeText ?></span>
+                                        <small class="text-muted" style="font-size: 0.68rem;">
+                                            <?= date('M d, Y', strtotime($ann['created_at'])) ?>
+                                        </small>
+                                    </div>
+                                    <div class="fw-semibold text-dark small mb-1" style="line-height: 1.25;">
+                                        <?= e($ann['title']) ?>
+                                    </div>
+                                    <p class="text-muted small mb-0" style="font-size: 0.75rem; line-height: 1.3; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">
+                                        <?= e($ann['message']) ?>
+                                    </p>
+                                </a>
+                            </li>
+                        <?php endforeach; ?>
+                    <?php endif; ?>
+                </div>
+
+                <li class="py-2 bg-light text-center border-top">
+                    <a href="<?= url('dashboard') ?>" class="text-decoration-none fw-semibold small text-primary" style="font-size: 0.75rem;">
+                        View All on Dashboard &rarr;
+                    </a>
+                </li>
+            </ul>
+        </div>
 
         <!-- Org Pill -->
         <div class="d-none d-xl-flex align-items-center gap-2 px-3 py-1 bg-light rounded-pill border">
