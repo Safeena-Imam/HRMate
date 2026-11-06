@@ -10,28 +10,7 @@ $activeTab = $activeTab ?? 'my-workspace';
      TAB 1: PERSONAL WORKSPACE OVERVIEW
      ============================================================= -->
 <div class="hrm-tab-pane <?= $activeTab === 'my-workspace' ? 'active' : '' ?>" id="tab-my-workspace">
-    <?php if (!empty($announcements)): ?>
-        <!-- Company Announcement Broadcast Banner -->
-        <div class="mb-4">
-            <?php foreach ($announcements as $ann): 
-                $priorityClass = ($ann['priority'] === 'urgent') ? 'border-danger bg-danger bg-opacity-10' : (($ann['priority'] === 'warning') ? 'border-warning bg-warning bg-opacity-10' : 'border-info bg-info bg-opacity-10');
-                $priorityBadge = ($ann['priority'] === 'urgent') ? 'bg-danger text-white' : (($ann['priority'] === 'warning') ? 'bg-warning text-dark' : 'bg-info text-dark');
-                $priorityIcon  = ($ann['priority'] === 'urgent') ? 'bi-exclamation-octagon-fill text-danger' : (($ann['priority'] === 'warning') ? 'bi-exclamation-triangle-fill text-warning' : 'bi-info-circle-fill text-info');
-            ?>
-                <div class="p-3 rounded-3 border mb-2 d-flex align-items-start gap-3 <?= $priorityClass ?> shadow-sm">
-                    <i class="bi <?= $priorityIcon ?> fs-4 mt-1"></i>
-                    <div class="flex-grow-1">
-                        <div class="d-flex align-items-center gap-2 mb-1 flex-wrap">
-                            <span class="badge <?= $priorityBadge ?> text-uppercase small" style="font-size: 0.68rem;"><?= strtoupper($ann['priority']) ?></span>
-                            <h6 class="fw-bold mb-0 text-dark"><?= e($ann['title']) ?></h6>
-                            <small class="text-muted font-monospace" style="font-size: 0.72rem;">&bull; Broadcast by Management (<?= date('M d, Y', strtotime($ann['created_at'])) ?>)</small>
-                        </div>
-                        <p class="small text-secondary mb-0"><?= e($ann['message']) ?></p>
-                    </div>
-                </div>
-            <?php endforeach; ?>
-        </div>
-    <?php endif; ?>
+
     <!-- 4 Personal Metric Cards -->
     <div class="row g-3 mb-4">
         <div class="col-12 col-sm-6 col-xl-3">
