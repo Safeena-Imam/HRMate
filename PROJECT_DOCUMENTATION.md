@@ -292,9 +292,43 @@ To eliminate remote clock-in fraud and simplify administrative overhead, HRMate 
 4. **Audit Synchrony:** Approved leaves automatically sync with the attendance grid as `Approved Leave`.
 
 ### 5.6 Payroll & Compensation Processing
-* **Batch Salary Generation:** Admin selects processing month (YYYY-MM); system generates payroll records based on employees' basic salary, designated allowances, and deductions.
-* **Net Salary Formula:**
-  $$\text{Net Salary} = \text{Basic Salary} + \text{Allowances} - \text{Deductions}$$
+
+#### A. Overview & Where Salaries Are Defined:
+* Each employee has an assigned **Base Salary** configured during onboarding (stored in the `employees.base_salary` column).
+* Administrators can view and manage base salaries from the **Employees (`/employees`)** roster or directly in the **Payroll (`/payroll`)** table.
+
+#### B. The Automated Attendance-Linked Salary Formula:
+When the administrator clicks **"Calculate from Attendance"**, the system connects to the employee's attendance logs for that calendar month and applies the following clear corporate formulas:
+
+1. **Daily Rate (Aik Din Ki Dihadi):**
+   $$\text{Per-Day Rate} = \frac{\text{Base Salary}}{\text{Working Days (Mon to Fri in month, approx. 22 days)}}$$
+
+2. **Deductions for Absences & Half-Days:**
+   * **Full-Day Absent (Bina Ittila Chutti):** Deducts **$1.0 \times \text{Per-Day Rate}$**.
+   * **Half-Day (Aadha Din):** Deducts **$0.5 \times \text{Per-Day Rate}$** (50% cut).
+   * **Approved Leave (Manzoor Shuda Chutti):** Deducts **PKR 0** (Full salary paid).
+   * **Weekend / Company Holiday:** Deducts **PKR 0** (Paid non-working days).
+
+3. **Allowances & Tax:**
+   * **Medical & Utility Allowance:** Automatically adds $+10\%$ of Base Salary.
+   * **Income Tax:** Withholds $5\%$ on gross taxable earnings exceeding PKR 50,000.
+
+4. **Final Net Pay Formula:**
+   $$\text{Net Salary} = \text{Base Salary} + \text{Allowances} - \text{Absent Deductions} - \text{Tax}$$
+
+#### 💡 Practical Real-World Example (Asaan Misal for Viva & Reports):
+Assume an employee has a Base Salary of **PKR 66,000** in a month with **22 Working Days**:
+* **Per-Day Rate:** $\text{PKR } 66,000 \div 22 = \textbf{PKR 3,000 / day}$.
+* If the employee has:
+  * **1 Full Absent:** Cut = $\text{PKR 3,000}$
+  * **1 Half-Day:** Cut = $\text{PKR 1,500}$
+  * **2 Approved Leaves:** Cut = $\text{PKR 0}$ (Paid)
+* **Total Attendance Deduction:** $\text{PKR } 3,000 + 1,500 = \textbf{- PKR 4,500}$.
+* **Allowance (+10%):** $+ \text{PKR 6,600}$.
+* **Net Salary Payable:** $\text{PKR } 66,000 + 6,600 - 4,500 - \text{Tax} = \textbf{PKR 66,970}$.
+
+#### C. Operational Payroll Features:
+* **Batch Salary Generation:** Computes salaries for all active staff in 1 click.
 * **Status Workflow:** Transition payroll states from `Draft` $\rightarrow$ `Pending` $\rightarrow$ `Paid`.
 * **Printable Payslip Modal:** Generates clean, printer-friendly corporate salary slips with employee code, department, itemized breakdown, and authorized signature line.
 * **CSV Payroll Export:** One-click financial download for accounting records.

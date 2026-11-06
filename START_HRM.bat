@@ -28,23 +28,17 @@ echo  =======================================================
 echo.
 echo   [ADMIN CREDENTIALS]
 echo     Username: admin
-echo     Password: password123 (or AdminPassword2026!)
+echo     Password: AdminPassword2026!
 echo.
 echo   [EMPLOYEE TEST CREDENTIALS]
 echo     Username: bareera.imam
-echo     Password: password123 (or Employee#2026)
+echo     Password: Employee#2026
 echo.
 echo   Press Ctrl+C to STOP the server.
 echo  =======================================================
 echo.
 
-cd /d "%~dp0"
-if not exist ".env" (
-    if exist ".env.example" (
-        copy ".env.example" ".env" >nul
-        echo        Created .env from .env.example
-    )
-)
+cd /d "c:\Users\safee\Desktop\HRM SYSTEM"
 php -S localhost:8000 -t public
 
 pause
