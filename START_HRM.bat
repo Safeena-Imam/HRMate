@@ -8,37 +8,48 @@ echo               HRMate - HR Management System
 echo  =======================================================
 echo.
 
-:: Start MySQL if not running
-echo  [1/2] Checking MySQL Database Service...
+:: Check MySQL
+echo  [1/2] Checking MySQL...
 tasklist /fi "imagename eq mysqld.exe" 2>NUL | find /i "mysqld.exe" >NUL
 if "%ERRORLEVEL%"=="1" (
-    echo        Starting MySQL Server...
+    echo        Starting MySQL...
     start "" "C:\xampp\mysql\bin\mysqld.exe" --defaults-file="C:\xampp\mysql\bin\my.ini"
     timeout /t 3 /nobreak >nul
 )
 echo        MySQL is ACTIVE!
 
-:: Start PHP Server
-echo  [2/2] Starting PHP Server on localhost:8000...
+echo  [2/2] Starting HRMate on port 8000...
 echo.
 echo  =======================================================
-echo   SYSTEM IS ONLINE & READY!
-echo   Open your browser at: http://localhost:8000
+echo   SYSTEM READY!
+echo.
+echo   HRMate Portal   : http://localhost:8000
+echo   Database Viewer : http://localhost/phpmyadmin
 echo  =======================================================
 echo.
-echo   [ADMIN CREDENTIALS]
-echo     Username: admin
-echo     Password: AdminPassword2026!
+echo   [ADMIN]    admin / AdminPassword2026!
+echo   [EMPLOYEE] bareera.imam / Employee#2026
 echo.
-echo   [EMPLOYEE TEST CREDENTIALS]
-echo     Username: bareera.imam
-echo     Password: Employee#2026
+echo  =======================================================
+echo   DATABASE - HOW TO OPEN
+echo     Open XAMPP first, make sure Apache + MySQL running
+echo     Then visit: http://localhost/phpmyadmin
+echo     Username: root     Password: (empty)
+echo     Click "hrm_system" in left side panel
+echo  =======================================================
 echo.
-echo   Press Ctrl+C to STOP the server.
+echo   Press Ctrl+C to stop.
 echo  =======================================================
 echo.
 
-cd /d "c:\Users\safee\Desktop\HRM SYSTEM"
+start "" "http://localhost:8000"
+
+cd /d "%~dp0"
+if not exist ".env" (
+    if exist ".env.example" (
+        copy ".env.example" ".env" >nul
+    )
+)
 php -S localhost:8000 -t public
 
 pause
