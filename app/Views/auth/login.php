@@ -97,9 +97,6 @@
                         </button>
                     </div>
 
-                    <div class="text-center text-muted small mt-3">
-                        <i class="bi bi-shield-lock me-1"></i>Protected by Role-Based Access Control &bull; Part 1
-                    </div>
                 </form>
             </div>
         </div>
